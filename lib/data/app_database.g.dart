@@ -33,10 +33,7 @@ class $PidCatalogTable extends PidCatalog
   @override
   late final GeneratedColumn<String> description = GeneratedColumn<String>(
       'description', aliasedName, false,
-      additionalChecks:
-          GeneratedColumn.checkTextLength(minTextLength: 1, maxTextLength: 255),
-      type: DriftSqlType.string,
-      requiredDuringInsert: true);
+      type: DriftSqlType.string, requiredDuringInsert: true);
   static const VerificationMeta _minValueMeta =
       const VerificationMeta('minValue');
   @override
@@ -49,20 +46,14 @@ class $PidCatalogTable extends PidCatalog
   late final GeneratedColumn<double> maxValue = GeneratedColumn<double>(
       'max_value', aliasedName, true,
       type: DriftSqlType.double, requiredDuringInsert: false);
-  static const VerificationMeta _unitsMeta = const VerificationMeta('units');
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
   @override
-  late final GeneratedColumn<String> units = GeneratedColumn<String>(
-      'units', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
-  static const VerificationMeta _formulaMeta =
-      const VerificationMeta('formula');
-  @override
-  late final GeneratedColumn<String> formula = GeneratedColumn<String>(
-      'formula', aliasedName, true,
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+      'unit', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns =>
-      [id, mode, pid, description, minValue, maxValue, units, formula];
+      [id, mode, pid, description, minValue, maxValue, unit];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -104,13 +95,9 @@ class $PidCatalogTable extends PidCatalog
       context.handle(_maxValueMeta,
           maxValue.isAcceptableOrUnknown(data['max_value']!, _maxValueMeta));
     }
-    if (data.containsKey('units')) {
+    if (data.containsKey('unit')) {
       context.handle(
-          _unitsMeta, units.isAcceptableOrUnknown(data['units']!, _unitsMeta));
-    }
-    if (data.containsKey('formula')) {
-      context.handle(_formulaMeta,
-          formula.isAcceptableOrUnknown(data['formula']!, _formulaMeta));
+          _unitMeta, unit.isAcceptableOrUnknown(data['unit']!, _unitMeta));
     }
     return context;
   }
@@ -133,10 +120,8 @@ class $PidCatalogTable extends PidCatalog
           .read(DriftSqlType.double, data['${effectivePrefix}min_value']),
       maxValue: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}max_value']),
-      units: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}units']),
-      formula: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}formula']),
+      unit: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}unit']),
     );
   }
 
@@ -153,8 +138,7 @@ class PidCatalogData extends DataClass implements Insertable<PidCatalogData> {
   final String description;
   final double? minValue;
   final double? maxValue;
-  final String? units;
-  final String? formula;
+  final String? unit;
   const PidCatalogData(
       {required this.id,
       required this.mode,
@@ -162,8 +146,7 @@ class PidCatalogData extends DataClass implements Insertable<PidCatalogData> {
       required this.description,
       this.minValue,
       this.maxValue,
-      this.units,
-      this.formula});
+      this.unit});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -177,11 +160,8 @@ class PidCatalogData extends DataClass implements Insertable<PidCatalogData> {
     if (!nullToAbsent || maxValue != null) {
       map['max_value'] = Variable<double>(maxValue);
     }
-    if (!nullToAbsent || units != null) {
-      map['units'] = Variable<String>(units);
-    }
-    if (!nullToAbsent || formula != null) {
-      map['formula'] = Variable<String>(formula);
+    if (!nullToAbsent || unit != null) {
+      map['unit'] = Variable<String>(unit);
     }
     return map;
   }
@@ -198,11 +178,7 @@ class PidCatalogData extends DataClass implements Insertable<PidCatalogData> {
       maxValue: maxValue == null && nullToAbsent
           ? const Value.absent()
           : Value(maxValue),
-      units:
-          units == null && nullToAbsent ? const Value.absent() : Value(units),
-      formula: formula == null && nullToAbsent
-          ? const Value.absent()
-          : Value(formula),
+      unit: unit == null && nullToAbsent ? const Value.absent() : Value(unit),
     );
   }
 
@@ -216,8 +192,7 @@ class PidCatalogData extends DataClass implements Insertable<PidCatalogData> {
       description: serializer.fromJson<String>(json['description']),
       minValue: serializer.fromJson<double?>(json['minValue']),
       maxValue: serializer.fromJson<double?>(json['maxValue']),
-      units: serializer.fromJson<String?>(json['units']),
-      formula: serializer.fromJson<String?>(json['formula']),
+      unit: serializer.fromJson<String?>(json['unit']),
     );
   }
   @override
@@ -230,8 +205,7 @@ class PidCatalogData extends DataClass implements Insertable<PidCatalogData> {
       'description': serializer.toJson<String>(description),
       'minValue': serializer.toJson<double?>(minValue),
       'maxValue': serializer.toJson<double?>(maxValue),
-      'units': serializer.toJson<String?>(units),
-      'formula': serializer.toJson<String?>(formula),
+      'unit': serializer.toJson<String?>(unit),
     };
   }
 
@@ -242,8 +216,7 @@ class PidCatalogData extends DataClass implements Insertable<PidCatalogData> {
           String? description,
           Value<double?> minValue = const Value.absent(),
           Value<double?> maxValue = const Value.absent(),
-          Value<String?> units = const Value.absent(),
-          Value<String?> formula = const Value.absent()}) =>
+          Value<String?> unit = const Value.absent()}) =>
       PidCatalogData(
         id: id ?? this.id,
         mode: mode ?? this.mode,
@@ -251,8 +224,7 @@ class PidCatalogData extends DataClass implements Insertable<PidCatalogData> {
         description: description ?? this.description,
         minValue: minValue.present ? minValue.value : this.minValue,
         maxValue: maxValue.present ? maxValue.value : this.maxValue,
-        units: units.present ? units.value : this.units,
-        formula: formula.present ? formula.value : this.formula,
+        unit: unit.present ? unit.value : this.unit,
       );
   PidCatalogData copyWithCompanion(PidCatalogCompanion data) {
     return PidCatalogData(
@@ -263,8 +235,7 @@ class PidCatalogData extends DataClass implements Insertable<PidCatalogData> {
           data.description.present ? data.description.value : this.description,
       minValue: data.minValue.present ? data.minValue.value : this.minValue,
       maxValue: data.maxValue.present ? data.maxValue.value : this.maxValue,
-      units: data.units.present ? data.units.value : this.units,
-      formula: data.formula.present ? data.formula.value : this.formula,
+      unit: data.unit.present ? data.unit.value : this.unit,
     );
   }
 
@@ -277,15 +248,14 @@ class PidCatalogData extends DataClass implements Insertable<PidCatalogData> {
           ..write('description: $description, ')
           ..write('minValue: $minValue, ')
           ..write('maxValue: $maxValue, ')
-          ..write('units: $units, ')
-          ..write('formula: $formula')
+          ..write('unit: $unit')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, mode, pid, description, minValue, maxValue, units, formula);
+  int get hashCode =>
+      Object.hash(id, mode, pid, description, minValue, maxValue, unit);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -296,8 +266,7 @@ class PidCatalogData extends DataClass implements Insertable<PidCatalogData> {
           other.description == this.description &&
           other.minValue == this.minValue &&
           other.maxValue == this.maxValue &&
-          other.units == this.units &&
-          other.formula == this.formula);
+          other.unit == this.unit);
 }
 
 class PidCatalogCompanion extends UpdateCompanion<PidCatalogData> {
@@ -307,8 +276,7 @@ class PidCatalogCompanion extends UpdateCompanion<PidCatalogData> {
   final Value<String> description;
   final Value<double?> minValue;
   final Value<double?> maxValue;
-  final Value<String?> units;
-  final Value<String?> formula;
+  final Value<String?> unit;
   const PidCatalogCompanion({
     this.id = const Value.absent(),
     this.mode = const Value.absent(),
@@ -316,8 +284,7 @@ class PidCatalogCompanion extends UpdateCompanion<PidCatalogData> {
     this.description = const Value.absent(),
     this.minValue = const Value.absent(),
     this.maxValue = const Value.absent(),
-    this.units = const Value.absent(),
-    this.formula = const Value.absent(),
+    this.unit = const Value.absent(),
   });
   PidCatalogCompanion.insert({
     this.id = const Value.absent(),
@@ -326,8 +293,7 @@ class PidCatalogCompanion extends UpdateCompanion<PidCatalogData> {
     required String description,
     this.minValue = const Value.absent(),
     this.maxValue = const Value.absent(),
-    this.units = const Value.absent(),
-    this.formula = const Value.absent(),
+    this.unit = const Value.absent(),
   })  : mode = Value(mode),
         pid = Value(pid),
         description = Value(description);
@@ -338,8 +304,7 @@ class PidCatalogCompanion extends UpdateCompanion<PidCatalogData> {
     Expression<String>? description,
     Expression<double>? minValue,
     Expression<double>? maxValue,
-    Expression<String>? units,
-    Expression<String>? formula,
+    Expression<String>? unit,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -348,8 +313,7 @@ class PidCatalogCompanion extends UpdateCompanion<PidCatalogData> {
       if (description != null) 'description': description,
       if (minValue != null) 'min_value': minValue,
       if (maxValue != null) 'max_value': maxValue,
-      if (units != null) 'units': units,
-      if (formula != null) 'formula': formula,
+      if (unit != null) 'unit': unit,
     });
   }
 
@@ -360,8 +324,7 @@ class PidCatalogCompanion extends UpdateCompanion<PidCatalogData> {
       Value<String>? description,
       Value<double?>? minValue,
       Value<double?>? maxValue,
-      Value<String?>? units,
-      Value<String?>? formula}) {
+      Value<String?>? unit}) {
     return PidCatalogCompanion(
       id: id ?? this.id,
       mode: mode ?? this.mode,
@@ -369,8 +332,7 @@ class PidCatalogCompanion extends UpdateCompanion<PidCatalogData> {
       description: description ?? this.description,
       minValue: minValue ?? this.minValue,
       maxValue: maxValue ?? this.maxValue,
-      units: units ?? this.units,
-      formula: formula ?? this.formula,
+      unit: unit ?? this.unit,
     );
   }
 
@@ -395,11 +357,8 @@ class PidCatalogCompanion extends UpdateCompanion<PidCatalogData> {
     if (maxValue.present) {
       map['max_value'] = Variable<double>(maxValue.value);
     }
-    if (units.present) {
-      map['units'] = Variable<String>(units.value);
-    }
-    if (formula.present) {
-      map['formula'] = Variable<String>(formula.value);
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
     }
     return map;
   }
@@ -413,18 +372,18 @@ class PidCatalogCompanion extends UpdateCompanion<PidCatalogData> {
           ..write('description: $description, ')
           ..write('minValue: $minValue, ')
           ..write('maxValue: $maxValue, ')
-          ..write('units: $units, ')
-          ..write('formula: $formula')
+          ..write('unit: $unit')
           ..write(')'))
         .toString();
   }
 }
 
-class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
+class $PidValuesTable extends PidValues
+    with TableInfo<$PidValuesTable, PidValue> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $SessionsTable(this.attachedDatabase, [this._alias]);
+  $PidValuesTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -434,251 +393,56 @@ class $SessionsTable extends Sessions with TableInfo<$SessionsTable, Session> {
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _startedAtMeta =
-      const VerificationMeta('startedAt');
+  static const VerificationMeta _pidIdMeta = const VerificationMeta('pidId');
   @override
-  late final GeneratedColumn<DateTime> startedAt = GeneratedColumn<DateTime>(
-      'started_at', aliasedName, false,
-      type: DriftSqlType.dateTime,
-      requiredDuringInsert: false,
-      defaultValue: currentDateAndTime);
-  @override
-  List<GeneratedColumn> get $columns => [id, startedAt];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'sessions';
-  @override
-  VerificationContext validateIntegrity(Insertable<Session> instance,
-      {bool isInserting = false}) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    }
-    if (data.containsKey('started_at')) {
-      context.handle(_startedAtMeta,
-          startedAt.isAcceptableOrUnknown(data['started_at']!, _startedAtMeta));
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  Session map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Session(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      startedAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}started_at'])!,
-    );
-  }
-
-  @override
-  $SessionsTable createAlias(String alias) {
-    return $SessionsTable(attachedDatabase, alias);
-  }
-}
-
-class Session extends DataClass implements Insertable<Session> {
-  final int id;
-  final DateTime startedAt;
-  const Session({required this.id, required this.startedAt});
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<int>(id);
-    map['started_at'] = Variable<DateTime>(startedAt);
-    return map;
-  }
-
-  SessionsCompanion toCompanion(bool nullToAbsent) {
-    return SessionsCompanion(
-      id: Value(id),
-      startedAt: Value(startedAt),
-    );
-  }
-
-  factory Session.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Session(
-      id: serializer.fromJson<int>(json['id']),
-      startedAt: serializer.fromJson<DateTime>(json['startedAt']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<int>(id),
-      'startedAt': serializer.toJson<DateTime>(startedAt),
-    };
-  }
-
-  Session copyWith({int? id, DateTime? startedAt}) => Session(
-        id: id ?? this.id,
-        startedAt: startedAt ?? this.startedAt,
-      );
-  Session copyWithCompanion(SessionsCompanion data) {
-    return Session(
-      id: data.id.present ? data.id.value : this.id,
-      startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('Session(')
-          ..write('id: $id, ')
-          ..write('startedAt: $startedAt')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, startedAt);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Session &&
-          other.id == this.id &&
-          other.startedAt == this.startedAt);
-}
-
-class SessionsCompanion extends UpdateCompanion<Session> {
-  final Value<int> id;
-  final Value<DateTime> startedAt;
-  const SessionsCompanion({
-    this.id = const Value.absent(),
-    this.startedAt = const Value.absent(),
-  });
-  SessionsCompanion.insert({
-    this.id = const Value.absent(),
-    this.startedAt = const Value.absent(),
-  });
-  static Insertable<Session> custom({
-    Expression<int>? id,
-    Expression<DateTime>? startedAt,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (startedAt != null) 'started_at': startedAt,
-    });
-  }
-
-  SessionsCompanion copyWith({Value<int>? id, Value<DateTime>? startedAt}) {
-    return SessionsCompanion(
-      id: id ?? this.id,
-      startedAt: startedAt ?? this.startedAt,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<int>(id.value);
-    }
-    if (startedAt.present) {
-      map['started_at'] = Variable<DateTime>(startedAt.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('SessionsCompanion(')
-          ..write('id: $id, ')
-          ..write('startedAt: $startedAt')
-          ..write(')'))
-        .toString();
-  }
-}
-
-class $ReadingsTable extends Readings with TableInfo<$ReadingsTable, Reading> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $ReadingsTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<int> id = GeneratedColumn<int>(
-      'id', aliasedName, false,
-      hasAutoIncrement: true,
-      type: DriftSqlType.int,
-      requiredDuringInsert: false,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _sessionIdMeta =
-      const VerificationMeta('sessionId');
-  @override
-  late final GeneratedColumn<int> sessionId = GeneratedColumn<int>(
-      'session_id', aliasedName, false,
-      type: DriftSqlType.int,
-      requiredDuringInsert: true,
-      $customConstraints: 'REFERENCES sessions(id)');
-  static const VerificationMeta _pidCatalogIdMeta =
-      const VerificationMeta('pidCatalogId');
-  @override
-  late final GeneratedColumn<int> pidCatalogId = GeneratedColumn<int>(
-      'pid_catalog_id', aliasedName, false,
+  late final GeneratedColumn<int> pidId = GeneratedColumn<int>(
+      'pid_id', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: true,
       $customConstraints: 'REFERENCES pid_catalog(id)');
   static const VerificationMeta _valueMeta = const VerificationMeta('value');
   @override
   late final GeneratedColumn<double> value = GeneratedColumn<double>(
-      'value', aliasedName, true,
-      type: DriftSqlType.double, requiredDuringInsert: false);
-  static const VerificationMeta _timestampMeta =
-      const VerificationMeta('timestamp');
+      'value', aliasedName, false,
+      type: DriftSqlType.double, requiredDuringInsert: true);
+  static const VerificationMeta _timeStampMeta =
+      const VerificationMeta('timeStamp');
   @override
-  late final GeneratedColumn<DateTime> timestamp = GeneratedColumn<DateTime>(
-      'timestamp', aliasedName, false,
+  late final GeneratedColumn<DateTime> timeStamp = GeneratedColumn<DateTime>(
+      'time_stamp', aliasedName, false,
       type: DriftSqlType.dateTime,
       requiredDuringInsert: false,
       defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, sessionId, pidCatalogId, value, timestamp];
+  List<GeneratedColumn> get $columns => [id, pidId, value, timeStamp];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'readings';
+  static const String $name = 'pid_values';
   @override
-  VerificationContext validateIntegrity(Insertable<Reading> instance,
+  VerificationContext validateIntegrity(Insertable<PidValue> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('session_id')) {
-      context.handle(_sessionIdMeta,
-          sessionId.isAcceptableOrUnknown(data['session_id']!, _sessionIdMeta));
-    } else if (isInserting) {
-      context.missing(_sessionIdMeta);
-    }
-    if (data.containsKey('pid_catalog_id')) {
+    if (data.containsKey('pid_id')) {
       context.handle(
-          _pidCatalogIdMeta,
-          pidCatalogId.isAcceptableOrUnknown(
-              data['pid_catalog_id']!, _pidCatalogIdMeta));
+          _pidIdMeta, pidId.isAcceptableOrUnknown(data['pid_id']!, _pidIdMeta));
     } else if (isInserting) {
-      context.missing(_pidCatalogIdMeta);
+      context.missing(_pidIdMeta);
     }
     if (data.containsKey('value')) {
       context.handle(
           _valueMeta, value.isAcceptableOrUnknown(data['value']!, _valueMeta));
+    } else if (isInserting) {
+      context.missing(_valueMeta);
     }
-    if (data.containsKey('timestamp')) {
-      context.handle(_timestampMeta,
-          timestamp.isAcceptableOrUnknown(data['timestamp']!, _timestampMeta));
+    if (data.containsKey('time_stamp')) {
+      context.handle(_timeStampMeta,
+          timeStamp.isAcceptableOrUnknown(data['time_stamp']!, _timeStampMeta));
     }
     return context;
   }
@@ -686,73 +450,63 @@ class $ReadingsTable extends Readings with TableInfo<$ReadingsTable, Reading> {
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  Reading map(Map<String, dynamic> data, {String? tablePrefix}) {
+  PidValue map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return Reading(
+    return PidValue(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      sessionId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}session_id'])!,
-      pidCatalogId: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}pid_catalog_id'])!,
+      pidId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}pid_id'])!,
       value: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}value']),
-      timestamp: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}timestamp'])!,
+          .read(DriftSqlType.double, data['${effectivePrefix}value'])!,
+      timeStamp: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}time_stamp'])!,
     );
   }
 
   @override
-  $ReadingsTable createAlias(String alias) {
-    return $ReadingsTable(attachedDatabase, alias);
+  $PidValuesTable createAlias(String alias) {
+    return $PidValuesTable(attachedDatabase, alias);
   }
 }
 
-class Reading extends DataClass implements Insertable<Reading> {
+class PidValue extends DataClass implements Insertable<PidValue> {
   final int id;
-  final int sessionId;
-  final int pidCatalogId;
-  final double? value;
-  final DateTime timestamp;
-  const Reading(
+  final int pidId;
+  final double value;
+  final DateTime timeStamp;
+  const PidValue(
       {required this.id,
-      required this.sessionId,
-      required this.pidCatalogId,
-      this.value,
-      required this.timestamp});
+      required this.pidId,
+      required this.value,
+      required this.timeStamp});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['session_id'] = Variable<int>(sessionId);
-    map['pid_catalog_id'] = Variable<int>(pidCatalogId);
-    if (!nullToAbsent || value != null) {
-      map['value'] = Variable<double>(value);
-    }
-    map['timestamp'] = Variable<DateTime>(timestamp);
+    map['pid_id'] = Variable<int>(pidId);
+    map['value'] = Variable<double>(value);
+    map['time_stamp'] = Variable<DateTime>(timeStamp);
     return map;
   }
 
-  ReadingsCompanion toCompanion(bool nullToAbsent) {
-    return ReadingsCompanion(
+  PidValuesCompanion toCompanion(bool nullToAbsent) {
+    return PidValuesCompanion(
       id: Value(id),
-      sessionId: Value(sessionId),
-      pidCatalogId: Value(pidCatalogId),
-      value:
-          value == null && nullToAbsent ? const Value.absent() : Value(value),
-      timestamp: Value(timestamp),
+      pidId: Value(pidId),
+      value: Value(value),
+      timeStamp: Value(timeStamp),
     );
   }
 
-  factory Reading.fromJson(Map<String, dynamic> json,
+  factory PidValue.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return Reading(
+    return PidValue(
       id: serializer.fromJson<int>(json['id']),
-      sessionId: serializer.fromJson<int>(json['sessionId']),
-      pidCatalogId: serializer.fromJson<int>(json['pidCatalogId']),
-      value: serializer.fromJson<double?>(json['value']),
-      timestamp: serializer.fromJson<DateTime>(json['timestamp']),
+      pidId: serializer.fromJson<int>(json['pidId']),
+      value: serializer.fromJson<double>(json['value']),
+      timeStamp: serializer.fromJson<DateTime>(json['timeStamp']),
     );
   }
   @override
@@ -760,113 +514,94 @@ class Reading extends DataClass implements Insertable<Reading> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'sessionId': serializer.toJson<int>(sessionId),
-      'pidCatalogId': serializer.toJson<int>(pidCatalogId),
-      'value': serializer.toJson<double?>(value),
-      'timestamp': serializer.toJson<DateTime>(timestamp),
+      'pidId': serializer.toJson<int>(pidId),
+      'value': serializer.toJson<double>(value),
+      'timeStamp': serializer.toJson<DateTime>(timeStamp),
     };
   }
 
-  Reading copyWith(
-          {int? id,
-          int? sessionId,
-          int? pidCatalogId,
-          Value<double?> value = const Value.absent(),
-          DateTime? timestamp}) =>
-      Reading(
+  PidValue copyWith(
+          {int? id, int? pidId, double? value, DateTime? timeStamp}) =>
+      PidValue(
         id: id ?? this.id,
-        sessionId: sessionId ?? this.sessionId,
-        pidCatalogId: pidCatalogId ?? this.pidCatalogId,
-        value: value.present ? value.value : this.value,
-        timestamp: timestamp ?? this.timestamp,
+        pidId: pidId ?? this.pidId,
+        value: value ?? this.value,
+        timeStamp: timeStamp ?? this.timeStamp,
       );
-  Reading copyWithCompanion(ReadingsCompanion data) {
-    return Reading(
+  PidValue copyWithCompanion(PidValuesCompanion data) {
+    return PidValue(
       id: data.id.present ? data.id.value : this.id,
-      sessionId: data.sessionId.present ? data.sessionId.value : this.sessionId,
-      pidCatalogId: data.pidCatalogId.present
-          ? data.pidCatalogId.value
-          : this.pidCatalogId,
+      pidId: data.pidId.present ? data.pidId.value : this.pidId,
       value: data.value.present ? data.value.value : this.value,
-      timestamp: data.timestamp.present ? data.timestamp.value : this.timestamp,
+      timeStamp: data.timeStamp.present ? data.timeStamp.value : this.timeStamp,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('Reading(')
+    return (StringBuffer('PidValue(')
           ..write('id: $id, ')
-          ..write('sessionId: $sessionId, ')
-          ..write('pidCatalogId: $pidCatalogId, ')
+          ..write('pidId: $pidId, ')
           ..write('value: $value, ')
-          ..write('timestamp: $timestamp')
+          ..write('timeStamp: $timeStamp')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, sessionId, pidCatalogId, value, timestamp);
+  int get hashCode => Object.hash(id, pidId, value, timeStamp);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is Reading &&
+      (other is PidValue &&
           other.id == this.id &&
-          other.sessionId == this.sessionId &&
-          other.pidCatalogId == this.pidCatalogId &&
+          other.pidId == this.pidId &&
           other.value == this.value &&
-          other.timestamp == this.timestamp);
+          other.timeStamp == this.timeStamp);
 }
 
-class ReadingsCompanion extends UpdateCompanion<Reading> {
+class PidValuesCompanion extends UpdateCompanion<PidValue> {
   final Value<int> id;
-  final Value<int> sessionId;
-  final Value<int> pidCatalogId;
-  final Value<double?> value;
-  final Value<DateTime> timestamp;
-  const ReadingsCompanion({
+  final Value<int> pidId;
+  final Value<double> value;
+  final Value<DateTime> timeStamp;
+  const PidValuesCompanion({
     this.id = const Value.absent(),
-    this.sessionId = const Value.absent(),
-    this.pidCatalogId = const Value.absent(),
+    this.pidId = const Value.absent(),
     this.value = const Value.absent(),
-    this.timestamp = const Value.absent(),
+    this.timeStamp = const Value.absent(),
   });
-  ReadingsCompanion.insert({
+  PidValuesCompanion.insert({
     this.id = const Value.absent(),
-    required int sessionId,
-    required int pidCatalogId,
-    this.value = const Value.absent(),
-    this.timestamp = const Value.absent(),
-  })  : sessionId = Value(sessionId),
-        pidCatalogId = Value(pidCatalogId);
-  static Insertable<Reading> custom({
+    required int pidId,
+    required double value,
+    this.timeStamp = const Value.absent(),
+  })  : pidId = Value(pidId),
+        value = Value(value);
+  static Insertable<PidValue> custom({
     Expression<int>? id,
-    Expression<int>? sessionId,
-    Expression<int>? pidCatalogId,
+    Expression<int>? pidId,
     Expression<double>? value,
-    Expression<DateTime>? timestamp,
+    Expression<DateTime>? timeStamp,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (sessionId != null) 'session_id': sessionId,
-      if (pidCatalogId != null) 'pid_catalog_id': pidCatalogId,
+      if (pidId != null) 'pid_id': pidId,
       if (value != null) 'value': value,
-      if (timestamp != null) 'timestamp': timestamp,
+      if (timeStamp != null) 'time_stamp': timeStamp,
     });
   }
 
-  ReadingsCompanion copyWith(
+  PidValuesCompanion copyWith(
       {Value<int>? id,
-      Value<int>? sessionId,
-      Value<int>? pidCatalogId,
-      Value<double?>? value,
-      Value<DateTime>? timestamp}) {
-    return ReadingsCompanion(
+      Value<int>? pidId,
+      Value<double>? value,
+      Value<DateTime>? timeStamp}) {
+    return PidValuesCompanion(
       id: id ?? this.id,
-      sessionId: sessionId ?? this.sessionId,
-      pidCatalogId: pidCatalogId ?? this.pidCatalogId,
+      pidId: pidId ?? this.pidId,
       value: value ?? this.value,
-      timestamp: timestamp ?? this.timestamp,
+      timeStamp: timeStamp ?? this.timeStamp,
     );
   }
 
@@ -876,29 +611,25 @@ class ReadingsCompanion extends UpdateCompanion<Reading> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (sessionId.present) {
-      map['session_id'] = Variable<int>(sessionId.value);
-    }
-    if (pidCatalogId.present) {
-      map['pid_catalog_id'] = Variable<int>(pidCatalogId.value);
+    if (pidId.present) {
+      map['pid_id'] = Variable<int>(pidId.value);
     }
     if (value.present) {
       map['value'] = Variable<double>(value.value);
     }
-    if (timestamp.present) {
-      map['timestamp'] = Variable<DateTime>(timestamp.value);
+    if (timeStamp.present) {
+      map['time_stamp'] = Variable<DateTime>(timeStamp.value);
     }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('ReadingsCompanion(')
+    return (StringBuffer('PidValuesCompanion(')
           ..write('id: $id, ')
-          ..write('sessionId: $sessionId, ')
-          ..write('pidCatalogId: $pidCatalogId, ')
+          ..write('pidId: $pidId, ')
           ..write('value: $value, ')
-          ..write('timestamp: $timestamp')
+          ..write('timeStamp: $timeStamp')
           ..write(')'))
         .toString();
   }
@@ -908,14 +639,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $PidCatalogTable pidCatalog = $PidCatalogTable(this);
-  late final $SessionsTable sessions = $SessionsTable(this);
-  late final $ReadingsTable readings = $ReadingsTable(this);
+  late final $PidValuesTable pidValues = $PidValuesTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [pidCatalog, sessions, readings];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [pidCatalog, pidValues];
 }
 
 typedef $$PidCatalogTableCreateCompanionBuilder = PidCatalogCompanion Function({
@@ -925,8 +654,7 @@ typedef $$PidCatalogTableCreateCompanionBuilder = PidCatalogCompanion Function({
   required String description,
   Value<double?> minValue,
   Value<double?> maxValue,
-  Value<String?> units,
-  Value<String?> formula,
+  Value<String?> unit,
 });
 typedef $$PidCatalogTableUpdateCompanionBuilder = PidCatalogCompanion Function({
   Value<int> id,
@@ -935,9 +663,28 @@ typedef $$PidCatalogTableUpdateCompanionBuilder = PidCatalogCompanion Function({
   Value<String> description,
   Value<double?> minValue,
   Value<double?> maxValue,
-  Value<String?> units,
-  Value<String?> formula,
+  Value<String?> unit,
 });
+
+final class $$PidCatalogTableReferences
+    extends BaseReferences<_$AppDatabase, $PidCatalogTable, PidCatalogData> {
+  $$PidCatalogTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$PidValuesTable, List<PidValue>>
+      _pidValuesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.pidValues,
+              aliasName:
+                  $_aliasNameGenerator(db.pidCatalog.id, db.pidValues.pidId));
+
+  $$PidValuesTableProcessedTableManager get pidValuesRefs {
+    final manager = $$PidValuesTableTableManager($_db, $_db.pidValues)
+        .filter((f) => f.pidId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_pidValuesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
 
 class $$PidCatalogTableFilterComposer
     extends Composer<_$AppDatabase, $PidCatalogTable> {
@@ -966,11 +713,29 @@ class $$PidCatalogTableFilterComposer
   ColumnFilters<double> get maxValue => $composableBuilder(
       column: $table.maxValue, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get units => $composableBuilder(
-      column: $table.units, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get formula => $composableBuilder(
-      column: $table.formula, builder: (column) => ColumnFilters(column));
+  Expression<bool> pidValuesRefs(
+      Expression<bool> Function($$PidValuesTableFilterComposer f) f) {
+    final $$PidValuesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.pidValues,
+        getReferencedColumn: (t) => t.pidId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PidValuesTableFilterComposer(
+              $db: $db,
+              $table: $db.pidValues,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$PidCatalogTableOrderingComposer
@@ -1000,11 +765,8 @@ class $$PidCatalogTableOrderingComposer
   ColumnOrderings<double> get maxValue => $composableBuilder(
       column: $table.maxValue, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get units => $composableBuilder(
-      column: $table.units, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<String> get formula => $composableBuilder(
-      column: $table.formula, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get unit => $composableBuilder(
+      column: $table.unit, builder: (column) => ColumnOrderings(column));
 }
 
 class $$PidCatalogTableAnnotationComposer
@@ -1034,11 +796,29 @@ class $$PidCatalogTableAnnotationComposer
   GeneratedColumn<double> get maxValue =>
       $composableBuilder(column: $table.maxValue, builder: (column) => column);
 
-  GeneratedColumn<String> get units =>
-      $composableBuilder(column: $table.units, builder: (column) => column);
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
 
-  GeneratedColumn<String> get formula =>
-      $composableBuilder(column: $table.formula, builder: (column) => column);
+  Expression<T> pidValuesRefs<T extends Object>(
+      Expression<T> Function($$PidValuesTableAnnotationComposer a) f) {
+    final $$PidValuesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.pidValues,
+        getReferencedColumn: (t) => t.pidId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PidValuesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.pidValues,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$PidCatalogTableTableManager extends RootTableManager<
@@ -1050,12 +830,9 @@ class $$PidCatalogTableTableManager extends RootTableManager<
     $$PidCatalogTableAnnotationComposer,
     $$PidCatalogTableCreateCompanionBuilder,
     $$PidCatalogTableUpdateCompanionBuilder,
-    (
-      PidCatalogData,
-      BaseReferences<_$AppDatabase, $PidCatalogTable, PidCatalogData>
-    ),
+    (PidCatalogData, $$PidCatalogTableReferences),
     PidCatalogData,
-    PrefetchHooks Function()> {
+    PrefetchHooks Function({bool pidValuesRefs})> {
   $$PidCatalogTableTableManager(_$AppDatabase db, $PidCatalogTable table)
       : super(TableManagerState(
           db: db,
@@ -1073,8 +850,7 @@ class $$PidCatalogTableTableManager extends RootTableManager<
             Value<String> description = const Value.absent(),
             Value<double?> minValue = const Value.absent(),
             Value<double?> maxValue = const Value.absent(),
-            Value<String?> units = const Value.absent(),
-            Value<String?> formula = const Value.absent(),
+            Value<String?> unit = const Value.absent(),
           }) =>
               PidCatalogCompanion(
             id: id,
@@ -1083,8 +859,7 @@ class $$PidCatalogTableTableManager extends RootTableManager<
             description: description,
             minValue: minValue,
             maxValue: maxValue,
-            units: units,
-            formula: formula,
+            unit: unit,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -1093,8 +868,7 @@ class $$PidCatalogTableTableManager extends RootTableManager<
             required String description,
             Value<double?> minValue = const Value.absent(),
             Value<double?> maxValue = const Value.absent(),
-            Value<String?> units = const Value.absent(),
-            Value<String?> formula = const Value.absent(),
+            Value<String?> unit = const Value.absent(),
           }) =>
               PidCatalogCompanion.insert(
             id: id,
@@ -1103,13 +877,38 @@ class $$PidCatalogTableTableManager extends RootTableManager<
             description: description,
             minValue: minValue,
             maxValue: maxValue,
-            units: units,
-            formula: formula,
+            unit: unit,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable(table),
+                    $$PidCatalogTableReferences(db, table, e)
+                  ))
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({pidValuesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (pidValuesRefs) db.pidValues],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (pidValuesRefs)
+                    await $_getPrefetchedData<PidCatalogData, $PidCatalogTable,
+                            PidValue>(
+                        currentTable: table,
+                        referencedTable:
+                            $$PidCatalogTableReferences._pidValuesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$PidCatalogTableReferences(db, table, p0)
+                                .pidValuesRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.pidId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
         ));
 }
 
@@ -1122,24 +921,44 @@ typedef $$PidCatalogTableProcessedTableManager = ProcessedTableManager<
     $$PidCatalogTableAnnotationComposer,
     $$PidCatalogTableCreateCompanionBuilder,
     $$PidCatalogTableUpdateCompanionBuilder,
-    (
-      PidCatalogData,
-      BaseReferences<_$AppDatabase, $PidCatalogTable, PidCatalogData>
-    ),
+    (PidCatalogData, $$PidCatalogTableReferences),
     PidCatalogData,
-    PrefetchHooks Function()>;
-typedef $$SessionsTableCreateCompanionBuilder = SessionsCompanion Function({
+    PrefetchHooks Function({bool pidValuesRefs})>;
+typedef $$PidValuesTableCreateCompanionBuilder = PidValuesCompanion Function({
   Value<int> id,
-  Value<DateTime> startedAt,
+  required int pidId,
+  required double value,
+  Value<DateTime> timeStamp,
 });
-typedef $$SessionsTableUpdateCompanionBuilder = SessionsCompanion Function({
+typedef $$PidValuesTableUpdateCompanionBuilder = PidValuesCompanion Function({
   Value<int> id,
-  Value<DateTime> startedAt,
+  Value<int> pidId,
+  Value<double> value,
+  Value<DateTime> timeStamp,
 });
 
-class $$SessionsTableFilterComposer
-    extends Composer<_$AppDatabase, $SessionsTable> {
-  $$SessionsTableFilterComposer({
+final class $$PidValuesTableReferences
+    extends BaseReferences<_$AppDatabase, $PidValuesTable, PidValue> {
+  $$PidValuesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $PidCatalogTable _pidIdTable(_$AppDatabase db) => db.pidCatalog
+      .createAlias($_aliasNameGenerator(db.pidValues.pidId, db.pidCatalog.id));
+
+  $$PidCatalogTableProcessedTableManager get pidId {
+    final $_column = $_itemColumn<int>('pid_id')!;
+
+    final manager = $$PidCatalogTableTableManager($_db, $_db.pidCatalog)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_pidIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$PidValuesTableFilterComposer
+    extends Composer<_$AppDatabase, $PidValuesTable> {
+  $$PidValuesTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1148,143 +967,37 @@ class $$SessionsTableFilterComposer
   });
   ColumnFilters<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<DateTime> get startedAt => $composableBuilder(
-      column: $table.startedAt, builder: (column) => ColumnFilters(column));
-}
-
-class $$SessionsTableOrderingComposer
-    extends Composer<_$AppDatabase, $SessionsTable> {
-  $$SessionsTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<DateTime> get startedAt => $composableBuilder(
-      column: $table.startedAt, builder: (column) => ColumnOrderings(column));
-}
-
-class $$SessionsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $SessionsTable> {
-  $$SessionsTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<int> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<DateTime> get startedAt =>
-      $composableBuilder(column: $table.startedAt, builder: (column) => column);
-}
-
-class $$SessionsTableTableManager extends RootTableManager<
-    _$AppDatabase,
-    $SessionsTable,
-    Session,
-    $$SessionsTableFilterComposer,
-    $$SessionsTableOrderingComposer,
-    $$SessionsTableAnnotationComposer,
-    $$SessionsTableCreateCompanionBuilder,
-    $$SessionsTableUpdateCompanionBuilder,
-    (Session, BaseReferences<_$AppDatabase, $SessionsTable, Session>),
-    Session,
-    PrefetchHooks Function()> {
-  $$SessionsTableTableManager(_$AppDatabase db, $SessionsTable table)
-      : super(TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer: () =>
-              $$SessionsTableFilterComposer($db: db, $table: table),
-          createOrderingComposer: () =>
-              $$SessionsTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer: () =>
-              $$SessionsTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<DateTime> startedAt = const Value.absent(),
-          }) =>
-              SessionsCompanion(
-            id: id,
-            startedAt: startedAt,
-          ),
-          createCompanionCallback: ({
-            Value<int> id = const Value.absent(),
-            Value<DateTime> startedAt = const Value.absent(),
-          }) =>
-              SessionsCompanion.insert(
-            id: id,
-            startedAt: startedAt,
-          ),
-          withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
-              .toList(),
-          prefetchHooksCallback: null,
-        ));
-}
-
-typedef $$SessionsTableProcessedTableManager = ProcessedTableManager<
-    _$AppDatabase,
-    $SessionsTable,
-    Session,
-    $$SessionsTableFilterComposer,
-    $$SessionsTableOrderingComposer,
-    $$SessionsTableAnnotationComposer,
-    $$SessionsTableCreateCompanionBuilder,
-    $$SessionsTableUpdateCompanionBuilder,
-    (Session, BaseReferences<_$AppDatabase, $SessionsTable, Session>),
-    Session,
-    PrefetchHooks Function()>;
-typedef $$ReadingsTableCreateCompanionBuilder = ReadingsCompanion Function({
-  Value<int> id,
-  required int sessionId,
-  required int pidCatalogId,
-  Value<double?> value,
-  Value<DateTime> timestamp,
-});
-typedef $$ReadingsTableUpdateCompanionBuilder = ReadingsCompanion Function({
-  Value<int> id,
-  Value<int> sessionId,
-  Value<int> pidCatalogId,
-  Value<double?> value,
-  Value<DateTime> timestamp,
-});
-
-class $$ReadingsTableFilterComposer
-    extends Composer<_$AppDatabase, $ReadingsTable> {
-  $$ReadingsTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<int> get id => $composableBuilder(
-      column: $table.id, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get sessionId => $composableBuilder(
-      column: $table.sessionId, builder: (column) => ColumnFilters(column));
-
-  ColumnFilters<int> get pidCatalogId => $composableBuilder(
-      column: $table.pidCatalogId, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<double> get value => $composableBuilder(
       column: $table.value, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get timestamp => $composableBuilder(
-      column: $table.timestamp, builder: (column) => ColumnFilters(column));
+  ColumnFilters<DateTime> get timeStamp => $composableBuilder(
+      column: $table.timeStamp, builder: (column) => ColumnFilters(column));
+
+  $$PidCatalogTableFilterComposer get pidId {
+    final $$PidCatalogTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.pidId,
+        referencedTable: $db.pidCatalog,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PidCatalogTableFilterComposer(
+              $db: $db,
+              $table: $db.pidCatalog,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
-class $$ReadingsTableOrderingComposer
-    extends Composer<_$AppDatabase, $ReadingsTable> {
-  $$ReadingsTableOrderingComposer({
+class $$PidValuesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PidValuesTable> {
+  $$PidValuesTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1294,23 +1007,36 @@ class $$ReadingsTableOrderingComposer
   ColumnOrderings<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<int> get sessionId => $composableBuilder(
-      column: $table.sessionId, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<int> get pidCatalogId => $composableBuilder(
-      column: $table.pidCatalogId,
-      builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<double> get value => $composableBuilder(
       column: $table.value, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<DateTime> get timestamp => $composableBuilder(
-      column: $table.timestamp, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<DateTime> get timeStamp => $composableBuilder(
+      column: $table.timeStamp, builder: (column) => ColumnOrderings(column));
+
+  $$PidCatalogTableOrderingComposer get pidId {
+    final $$PidCatalogTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.pidId,
+        referencedTable: $db.pidCatalog,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PidCatalogTableOrderingComposer(
+              $db: $db,
+              $table: $db.pidCatalog,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
-class $$ReadingsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ReadingsTable> {
-  $$ReadingsTableAnnotationComposer({
+class $$PidValuesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PidValuesTable> {
+  $$PidValuesTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -1320,96 +1046,140 @@ class $$ReadingsTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<int> get sessionId =>
-      $composableBuilder(column: $table.sessionId, builder: (column) => column);
-
-  GeneratedColumn<int> get pidCatalogId => $composableBuilder(
-      column: $table.pidCatalogId, builder: (column) => column);
-
   GeneratedColumn<double> get value =>
       $composableBuilder(column: $table.value, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get timestamp =>
-      $composableBuilder(column: $table.timestamp, builder: (column) => column);
+  GeneratedColumn<DateTime> get timeStamp =>
+      $composableBuilder(column: $table.timeStamp, builder: (column) => column);
+
+  $$PidCatalogTableAnnotationComposer get pidId {
+    final $$PidCatalogTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.pidId,
+        referencedTable: $db.pidCatalog,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$PidCatalogTableAnnotationComposer(
+              $db: $db,
+              $table: $db.pidCatalog,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
-class $$ReadingsTableTableManager extends RootTableManager<
+class $$PidValuesTableTableManager extends RootTableManager<
     _$AppDatabase,
-    $ReadingsTable,
-    Reading,
-    $$ReadingsTableFilterComposer,
-    $$ReadingsTableOrderingComposer,
-    $$ReadingsTableAnnotationComposer,
-    $$ReadingsTableCreateCompanionBuilder,
-    $$ReadingsTableUpdateCompanionBuilder,
-    (Reading, BaseReferences<_$AppDatabase, $ReadingsTable, Reading>),
-    Reading,
-    PrefetchHooks Function()> {
-  $$ReadingsTableTableManager(_$AppDatabase db, $ReadingsTable table)
+    $PidValuesTable,
+    PidValue,
+    $$PidValuesTableFilterComposer,
+    $$PidValuesTableOrderingComposer,
+    $$PidValuesTableAnnotationComposer,
+    $$PidValuesTableCreateCompanionBuilder,
+    $$PidValuesTableUpdateCompanionBuilder,
+    (PidValue, $$PidValuesTableReferences),
+    PidValue,
+    PrefetchHooks Function({bool pidId})> {
+  $$PidValuesTableTableManager(_$AppDatabase db, $PidValuesTable table)
       : super(TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$ReadingsTableFilterComposer($db: db, $table: table),
+              $$PidValuesTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$ReadingsTableOrderingComposer($db: db, $table: table),
+              $$PidValuesTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$ReadingsTableAnnotationComposer($db: db, $table: table),
+              $$PidValuesTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            Value<int> sessionId = const Value.absent(),
-            Value<int> pidCatalogId = const Value.absent(),
-            Value<double?> value = const Value.absent(),
-            Value<DateTime> timestamp = const Value.absent(),
+            Value<int> pidId = const Value.absent(),
+            Value<double> value = const Value.absent(),
+            Value<DateTime> timeStamp = const Value.absent(),
           }) =>
-              ReadingsCompanion(
+              PidValuesCompanion(
             id: id,
-            sessionId: sessionId,
-            pidCatalogId: pidCatalogId,
+            pidId: pidId,
             value: value,
-            timestamp: timestamp,
+            timeStamp: timeStamp,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            required int sessionId,
-            required int pidCatalogId,
-            Value<double?> value = const Value.absent(),
-            Value<DateTime> timestamp = const Value.absent(),
+            required int pidId,
+            required double value,
+            Value<DateTime> timeStamp = const Value.absent(),
           }) =>
-              ReadingsCompanion.insert(
+              PidValuesCompanion.insert(
             id: id,
-            sessionId: sessionId,
-            pidCatalogId: pidCatalogId,
+            pidId: pidId,
             value: value,
-            timestamp: timestamp,
+            timeStamp: timeStamp,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable(table),
+                    $$PidValuesTableReferences(db, table, e)
+                  ))
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({pidId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (pidId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.pidId,
+                    referencedTable: $$PidValuesTableReferences._pidIdTable(db),
+                    referencedColumn:
+                        $$PidValuesTableReferences._pidIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
         ));
 }
 
-typedef $$ReadingsTableProcessedTableManager = ProcessedTableManager<
+typedef $$PidValuesTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
-    $ReadingsTable,
-    Reading,
-    $$ReadingsTableFilterComposer,
-    $$ReadingsTableOrderingComposer,
-    $$ReadingsTableAnnotationComposer,
-    $$ReadingsTableCreateCompanionBuilder,
-    $$ReadingsTableUpdateCompanionBuilder,
-    (Reading, BaseReferences<_$AppDatabase, $ReadingsTable, Reading>),
-    Reading,
-    PrefetchHooks Function()>;
+    $PidValuesTable,
+    PidValue,
+    $$PidValuesTableFilterComposer,
+    $$PidValuesTableOrderingComposer,
+    $$PidValuesTableAnnotationComposer,
+    $$PidValuesTableCreateCompanionBuilder,
+    $$PidValuesTableUpdateCompanionBuilder,
+    (PidValue, $$PidValuesTableReferences),
+    PidValue,
+    PrefetchHooks Function({bool pidId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
   $AppDatabaseManager(this._db);
   $$PidCatalogTableTableManager get pidCatalog =>
       $$PidCatalogTableTableManager(_db, _db.pidCatalog);
-  $$SessionsTableTableManager get sessions =>
-      $$SessionsTableTableManager(_db, _db.sessions);
-  $$ReadingsTableTableManager get readings =>
-      $$ReadingsTableTableManager(_db, _db.readings);
+  $$PidValuesTableTableManager get pidValues =>
+      $$PidValuesTableTableManager(_db, _db.pidValues);
 }
