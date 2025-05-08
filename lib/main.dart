@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-import 'package:permission_handler/permission_handler.dart';
+
 import 'services/bluetooth_service.dart';
 import 'pages/obd_data_page.dart';
 
@@ -10,7 +10,6 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -38,6 +37,8 @@ class _MyHomePageState extends State<MyHomePage> {
   List<BluetoothDiscoveryResult> _devicesList = [];
   String _connectionStatus = "Disconnected";
   BluetoothConnection? _connection;
+
+  /// When true, we skip real Bluetooth and jump straight to the dashboard.
   bool _simulateOBDConnection = false;
 
   @override
@@ -52,36 +53,41 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _searchAndConnectOBD() async {
-    // 🔥 If Debug Mode is enabled, skip Bluetooth scanning and go directly to OBD Data Page
+    // ── 1) VERY FIRST THING: if we’re in debug/simulate mode, jump to the dashboard ──
     if (_simulateOBDConnection) {
       setState(() {
         _connectionStatus = "Connected to OBD (Simulated)";
+        _isDiscovering = false;
+        _devicesList.clear();
       });
+      await Future.delayed(const Duration(seconds: 1));
+      if (!mounted) return;
 
-      await Future.delayed(const Duration(seconds: 1)); // Simulate delay
-      if (mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ObdDataPage(
-              connection: null, // No actual connection in debug mode
-              simulated: true,
-            ),
+      // 🔥 DEBUG MODE: only this push, not pushReplacement
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ObdDataPage(
+            connection: null,
+            simulated: true,
           ),
-        );
-      }
-      return; // Exit the function
+        ),
+      );
+      return;
     }
 
-    // 🔵 Normal Bluetooth scanning starts here (only if NOT in Debug Mode)
-    bool permissionsGranted = await BluetoothService.requestPermissions();
-    if (!permissionsGranted) {
+    // ── 2) ONLY IF NOT SIMULATING do we fall into the real Bluetooth flow ──
+
+    // ask for permissions…
+    bool granted = await BluetoothService.requestPermissions();
+    if (!granted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Bluetooth permissions not granted')),
       );
       return;
     }
 
+    // check & enable Bluetooth…
     _bluetoothState = await BluetoothService.getBluetoothState();
     if (_bluetoothState == BluetoothState.STATE_OFF) {
       bool? enabled = await BluetoothService.enableBluetooth();
@@ -95,26 +101,24 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     }
 
-    _isDiscovering = true;
-    _devicesList.clear();
-    setState(() {});
+    // start discovery…
+    setState(() {
+      _isDiscovering = true;
+      _devicesList.clear();
+    });
 
     BluetoothService.startDiscovery(
-      onDeviceFound: (device) async {
-        if (!_devicesList.contains(device)) {
-          _devicesList.add(device);
+      onDeviceFound: (result) async {
+        if (!_devicesList.contains(result)) {
+          setState(() => _devicesList.add(result));
         }
-
-        if (device.device.name != null && device.device.name!.contains("OBD")) {
-          _isDiscovering = false;
-          setState(() {});
-          await _connectToDevice(device.device);
+        if (result.device.name?.contains("OBD") == true) {
+          setState(() => _isDiscovering = false);
+          await _connectToDevice(result.device);
         }
       },
       onDiscoveryComplete: () {
-        setState(() {
-          _isDiscovering = false;
-        });
+        setState(() => _isDiscovering = false);
       },
     );
   }
@@ -131,11 +135,45 @@ class _MyHomePageState extends State<MyHomePage> {
         }
       }
 
-      if (mounted) {
-        showDialog(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => Dialog(
+      if (!mounted) return;
+
+      // show the “connected” pop-up
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => Dialog(
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.asset('assets/bluetooth_connected.png', width: 150),
+                const SizedBox(height: 10),
+                Text(
+                  _simulateOBDConnection
+                      ? "Simulated Connection!"
+                      : "Connected Successfully!",
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await Future.delayed(const Duration(seconds: 2));
+      if (!mounted) return;
+
+      // show the “connected” dialog
+      showDialog(
+        context: context,
+        barrierDismissible: false, // optional—prevents tap-outside to dismiss
+        builder: (BuildContext dialogCtx) {
+          return Dialog(
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             child: Padding(
@@ -156,31 +194,29 @@ class _MyHomePageState extends State<MyHomePage> {
                 ],
               ),
             ),
-          ),
-        );
-
-        await Future.delayed(const Duration(seconds: 2));
-
-        if (mounted) {
-          Navigator.of(context).pop();
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ObdDataPage(
-                connection: _simulateOBDConnection ? null : _connection,
-                simulated: _simulateOBDConnection,
-              ),
-            ),
           );
-        }
-      }
+        },
+      );
+      await Future.delayed(const Duration(seconds: 2));
+      if (!mounted) return;
+      Navigator.of(context).pop(); // close dialog
+
+      // 🔵 REAL MODE: only this push, not pushReplacement
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ObdDataPage(
+            connection: _connection,
+            simulated: _simulateOBDConnection,
+          ),
+        ),
+      );
     } catch (e) {
-      if (mounted) {
-        setState(() => _connectionStatus = "Disconnected");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to connect: ${e.toString()}')),
-        );
-      }
+      if (!mounted) return;
+      setState(() => _connectionStatus = "Disconnected");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to connect: ${e.toString()}')),
+      );
     }
   }
 
@@ -227,29 +263,31 @@ class _MyHomePageState extends State<MyHomePage> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10)),
               ),
-              child: Text(_connectionStatus == "Connected to OBD"
-                  ? "Connected"
-                  : "Search for OBD"),
+              child: Text(
+                _connectionStatus == "Connected to OBD"
+                    ? "Connected"
+                    : "Search for OBD",
+              ),
             ),
             const SizedBox(height: 20),
-            _isDiscovering
-                ? const CircularProgressIndicator()
-                : _devicesList.isNotEmpty
-                    ? Expanded(
-                        child: ListView.builder(
-                          itemCount: _devicesList.length,
-                          itemBuilder: (context, index) {
-                            final result = _devicesList[index];
-                            return ListTile(
-                              title:
-                                  Text(result.device.name ?? 'Unknown device'),
-                              subtitle: Text(result.device.address),
-                              onTap: () => _connectToDevice(result.device),
-                            );
-                          },
-                        ),
-                      )
-                    : const Text('No devices discovered'),
+            if (_isDiscovering)
+              const CircularProgressIndicator()
+            else if (_devicesList.isNotEmpty)
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _devicesList.length,
+                  itemBuilder: (_, index) {
+                    final r = _devicesList[index];
+                    return ListTile(
+                      title: Text(r.device.name ?? 'Unknown device'),
+                      subtitle: Text(r.device.address),
+                      onTap: () => _connectToDevice(r.device),
+                    );
+                  },
+                ),
+              )
+            else
+              const Text('No devices discovered'),
           ],
         ),
       ),
@@ -257,25 +295,284 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class ObdDataPage extends StatelessWidget {
-  final BluetoothConnection? connection;
-  final bool simulated;
+// import 'package:flutter/material.dart';
+// import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+// import 'package:permission_handler/permission_handler.dart';
+// import 'services/bluetooth_service.dart';
+// import 'pages/obd_data_page.dart';
 
-  const ObdDataPage(
-      {super.key, required this.connection, required this.simulated});
+// void main() {
+//   runApp(const MyApp());
+// }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('OBD Data')),
-      body: Center(
-        child: connection != null || simulated
-            ? const Text('OBD data will be displayed here')
-            : const Text('No connection established'),
-      ),
-    );
-  }
-}
+// class MyApp extends StatelessWidget {
+//   const MyApp({super.key});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'OBD-II Connection',
+//       theme: ThemeData(
+//         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+//         useMaterial3: true,
+//       ),
+//       home: const MyHomePage(title: 'OBD-II Connection'),
+//     );
+//   }
+// }
+
+// class MyHomePage extends StatefulWidget {
+//   const MyHomePage({super.key, required this.title});
+//   final String title;
+
+//   @override
+//   State<MyHomePage> createState() => _MyHomePageState();
+// }
+
+// class _MyHomePageState extends State<MyHomePage> {
+//   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
+//   bool _isDiscovering = false;
+//   List<BluetoothDiscoveryResult> _devicesList = [];
+//   String _connectionStatus = "Disconnected";
+//   BluetoothConnection? _connection;
+//   bool _simulateOBDConnection = false;
+
+//   @override
+//   void initState() {
+//     super.initState();
+//     _checkBluetoothState();
+//   }
+
+//   Future<void> _checkBluetoothState() async {
+//     _bluetoothState = await BluetoothService.getBluetoothState();
+//     setState(() {});
+//   }
+
+//   Future<void> _searchAndConnectOBD() async {
+//     // 🔥 If Debug Mode is enabled, skip Bluetooth scanning and go directly to OBD Data Page
+//     if (_simulateOBDConnection) {
+//       setState(() {
+//         _connectionStatus = "Connected to OBD (Simulated)";
+//       });
+
+//       await Future.delayed(const Duration(seconds: 1)); // Simulate delay
+//       if (mounted) {
+//         Navigator.pushReplacement(
+//           context,
+//           MaterialPageRoute(
+//             builder: (context) => ObdDataPage(
+//               connection: null, // No actual connection in debug mode
+//               simulated: true,
+//             ),
+//           ),
+//         );
+//       }
+//       return; // Exit the function
+//     }
+
+//     // 🔵 Normal Bluetooth scanning starts here (only if NOT in Debug Mode)
+//     bool permissionsGranted = await BluetoothService.requestPermissions();
+//     if (!permissionsGranted) {
+//       ScaffoldMessenger.of(context).showSnackBar(
+//         const SnackBar(content: Text('Bluetooth permissions not granted')),
+//       );
+//       return;
+//     }
+
+//     _bluetoothState = await BluetoothService.getBluetoothState();
+//     if (_bluetoothState == BluetoothState.STATE_OFF) {
+//       bool? enabled = await BluetoothService.enableBluetooth();
+//       if (enabled == true) {
+//         setState(() => _bluetoothState = BluetoothState.STATE_ON);
+//       } else {
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           const SnackBar(content: Text('Failed to enable Bluetooth')),
+//         );
+//         return;
+//       }
+//     }
+
+//     _isDiscovering = true;
+//     _devicesList.clear();
+//     setState(() {});
+
+//     BluetoothService.startDiscovery(
+//       onDeviceFound: (device) async {
+//         if (!_devicesList.contains(device)) {
+//           _devicesList.add(device);
+//         }
+
+//         if (device.device.name != null && device.device.name!.contains("OBD")) {
+//           _isDiscovering = false;
+//           setState(() {});
+//           await _connectToDevice(device.device);
+//         }
+//       },
+//       onDiscoveryComplete: () {
+//         setState(() {
+//           _isDiscovering = false;
+//         });
+//       },
+//     );
+//   }
+
+//   Future<void> _connectToDevice(BluetoothDevice device) async {
+//     try {
+//       if (_simulateOBDConnection) {
+//         await Future.delayed(const Duration(seconds: 1));
+//         setState(() => _connectionStatus = "Connected to OBD (Simulated)");
+//       } else {
+//         _connection = await BluetoothService.connectToDevice(device);
+//         if (_connection?.isConnected ?? false) {
+//           setState(() => _connectionStatus = "Connected to OBD");
+//         }
+//       }
+
+//       if (mounted) {
+//         showDialog(
+//           context: context,
+//           barrierDismissible: false,
+//           builder: (context) => Dialog(
+//             shape:
+//                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+//             child: Padding(
+//               padding: const EdgeInsets.all(20),
+//               child: Column(
+//                 mainAxisSize: MainAxisSize.min,
+//                 children: [
+//                   Image.asset('assets/bluetooth_connected.png', width: 150),
+//                   const SizedBox(height: 10),
+//                   Text(
+//                     _simulateOBDConnection
+//                         ? "Simulated Connection!"
+//                         : "Connected Successfully!",
+//                     style: const TextStyle(
+//                         fontSize: 18, fontWeight: FontWeight.bold),
+//                     textAlign: TextAlign.center,
+//                   ),
+//                 ],
+//               ),
+//             ),
+//           ),
+//         );
+
+//         await Future.delayed(const Duration(seconds: 2));
+
+//         if (mounted) {
+//           Navigator.of(context).pop();
+//           Navigator.pushReplacement(
+//             context,
+//             MaterialPageRoute(
+//               builder: (context) => ObdDataPage(
+//                 connection: _simulateOBDConnection ? null : _connection,
+//                 simulated: _simulateOBDConnection,
+//               ),
+//             ),
+//           );
+//         }
+//       }
+//     } catch (e) {
+//       if (mounted) {
+//         setState(() => _connectionStatus = "Disconnected");
+//         ScaffoldMessenger.of(context).showSnackBar(
+//           SnackBar(content: Text('Failed to connect: ${e.toString()}')),
+//         );
+//       }
+//     }
+//   }
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+//         title: Text(widget.title),
+//         actions: [
+//           IconButton(
+//             icon: Icon(
+//               _simulateOBDConnection
+//                   ? Icons.bug_report
+//                   : Icons.bug_report_outlined,
+//               color: _simulateOBDConnection ? Colors.red : Colors.black,
+//             ),
+//             onPressed: () {
+//               setState(() => _simulateOBDConnection = !_simulateOBDConnection);
+//               ScaffoldMessenger.of(context).showSnackBar(
+//                 SnackBar(
+//                   content: Text(_simulateOBDConnection
+//                       ? "Simulation Mode Enabled"
+//                       : "Simulation Mode Disabled"),
+//                   duration: const Duration(seconds: 2),
+//                 ),
+//               );
+//             },
+//           ),
+//         ],
+//       ),
+//       body: Center(
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             ElevatedButton(
+//               onPressed: _searchAndConnectOBD,
+//               style: ElevatedButton.styleFrom(
+//                 backgroundColor: _connectionStatus == "Connected to OBD"
+//                     ? Colors.green
+//                     : Colors.amber,
+//                 padding:
+//                     const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+//                 shape: RoundedRectangleBorder(
+//                     borderRadius: BorderRadius.circular(10)),
+//               ),
+//               child: Text(_connectionStatus == "Connected to OBD"
+//                   ? "Connected"
+//                   : "Search for OBD"),
+//             ),
+//             const SizedBox(height: 20),
+//             _isDiscovering
+//                 ? const CircularProgressIndicator()
+//                 : _devicesList.isNotEmpty
+//                     ? Expanded(
+//                         child: ListView.builder(
+//                           itemCount: _devicesList.length,
+//                           itemBuilder: (context, index) {
+//                             final result = _devicesList[index];
+//                             return ListTile(
+//                               title:
+//                                   Text(result.device.name ?? 'Unknown device'),
+//                               subtitle: Text(result.device.address),
+//                               onTap: () => _connectToDevice(result.device),
+//                             );
+//                           },
+//                         ),
+//                       )
+//                     : const Text('No devices discovered'),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// class ObdDataPage extends StatelessWidget {
+//   final BluetoothConnection? connection;
+//   final bool simulated;
+
+//   const ObdDataPage(
+//       {super.key, required this.connection, required this.simulated});
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(title: const Text('OBD Data')),
+//       body: Center(
+//         child: connection != null || simulated
+//             ? const Text('OBD data will be displayed here')
+//             : const Text('No connection established'),
+//       ),
+//     );
+//   }
+// }
 
 // import 'package:flutter/material.dart';
 // import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
