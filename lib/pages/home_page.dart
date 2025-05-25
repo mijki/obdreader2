@@ -1,8 +1,11 @@
 // lib/pages/home_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:provider/provider.dart'; // ← NEW
+import '../data/app_database.dart'; // ← NEW
 import '../services/bluetooth_service.dart';
-import 'obd_data_page.dart';
+import 'obd_data_page.dart'; // same folder
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.title});
@@ -15,7 +18,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
   bool _isDiscovering = false;
-  List<BluetoothDiscoveryResult> _devicesList = [];
+  final List<BluetoothDiscoveryResult> _devicesList = [];
   String _connectionStatus = "Disconnected";
   BluetoothConnection? _connection;
 
@@ -34,6 +37,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _searchAndConnectOBD() async {
+    // ── 0) Purge previous session’s values for a clean slate ──
+    final db = Provider.of<AppDatabase>(context, listen: false);
+    await db.clearSessionValues();
+
     // ── 1) VERY FIRST THING: if we’re in debug/simulate mode, jump to the dashboard ──
     if (_simulateOBDConnection) {
       setState(() {
@@ -148,38 +155,8 @@ class _HomePageState extends State<HomePage> {
       await Future.delayed(const Duration(seconds: 2));
       if (!mounted) return;
 
-      // show the “connected” dialog
-      showDialog(
-        context: context,
-        barrierDismissible: false, // optional—prevents tap-outside to dismiss
-        builder: (BuildContext dialogCtx) {
-          return Dialog(
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Image.asset('assets/bluetooth_connected.png', width: 150),
-                  const SizedBox(height: 10),
-                  Text(
-                    _simulateOBDConnection
-                        ? "Simulated Connection!"
-                        : "Connected Successfully!",
-                    style: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      );
-      await Future.delayed(const Duration(seconds: 2));
-      if (!mounted) return;
-      Navigator.of(context).pop(); // close dialog
+      // close that dialog
+      Navigator.of(context).pop();
 
       // 🔵 REAL MODE: only this push, not pushReplacement
       Navigator.push(

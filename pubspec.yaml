@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
   cupertino_icons: ^1.0.8
   flutter_bluetooth_serial: ^0.4.0
   obd2_plugin:
@@ -20,13 +21,12 @@ dependencies:
   provider: ^6.0.5
   fl_chart: ^0.55.2
 
-  # ── Drift ──────────────────────────────────────────────
-  # Drift is a reactive persistence library for Flutter and Dart.
+  # ── Drift (your ORM) ──────────────────────────────────
   drift: ^2.9.0
+  sqlite3_flutter_libs: ^0.5.5
   sqflite: ^2.0.0+4
   path: any
   path_provider: any
-
 
 dev_dependencies:
   flutter_test:
@@ -35,11 +35,9 @@ dev_dependencies:
   flutter_launcher_icons: ^0.14.3
   flutter_native_splash: ^2.2.15
 
-  # DBT (Drift) dependencies
+  # DB tooling for Drift
   drift_dev: ^2.9.0
   build_runner: ^2.4.0
-  
-
 
 flutter:
   uses-material-design: true
